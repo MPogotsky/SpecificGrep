@@ -8,7 +8,6 @@ SpecificGrep::SpecificGrep(){};
 
 SpecificGrep::~SpecificGrep(){};
 
-
 void SpecificGrep::parseArguments(int argc, char *argv[])
 {
     po::options_description desc("Options");
@@ -18,12 +17,21 @@ void SpecificGrep::parseArguments(int argc, char *argv[])
         ("help", "These menu")
     ;
 
-    po::variables_map vm;
     if (argc == 1) {
         std::cout << desc << std::endl;
         exit(EXIT_FAILURE);
     }
 
+    for (int i = 1; i < argc; i++) {
+        auto arg = std::string(argv[i]);
+        if (arg == "-" || arg == "--") {
+            std::cerr << "Error: invalid command line syntax" << std::endl;
+            std::cerr << "Use --help for help" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, desc), vm);
         po::notify(vm);
@@ -31,14 +39,6 @@ void SpecificGrep::parseArguments(int argc, char *argv[])
         std::cerr << "Error: " << e.what() << std::endl;
         std::cerr << "Use --help for help" << std::endl;
         exit(EXIT_FAILURE);
-    }
-
-    for (int i = 1; i < argc; i++) {
-        if (std::string(argv[i]) == "-") {
-            std::cerr << "Error: invalid command line syntax" << std::endl;
-            std::cerr << "Use --help for help" << std::endl;
-            exit(EXIT_FAILURE);
-        }
     }
 
     if (vm.count("help")) {
