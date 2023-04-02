@@ -31,6 +31,8 @@ options_t Options::declareOptions()
 
 void Options::printHelp() const
 {
-    std::cout << "Usage: \n" << "\t ./specific_grep PATTERN OPTIONS \n" << std::endl;
+    std::cout << "Usage: \n"
+              << "\t ./specific_grep PATTERN OPTIONS \n"
+              << std::endl;
     std::cout << declared.standard << std::endl;
 }

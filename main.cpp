@@ -2,6 +2,6 @@
 
 int main(int argc, char *argv[])
 {
-    entryPoint.parseArguments(argc, argv);
+    specificGrep.entryPoint(argc, argv);
     return 0;
 }
