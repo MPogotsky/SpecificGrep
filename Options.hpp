@@ -20,10 +20,10 @@ public:
     virtual ~Options();
 
 protected:
-    const options_t declared;
     po::variables_map parseArgumets(int *argc, char ***argv);
     void printHelp() const;
 
 private:
+    const options_t declared;
     options_t declareOptions();
 };

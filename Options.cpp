@@ -34,7 +34,7 @@ po::variables_map Options::parseArgumets(int *argc, char ***argv)
     if (*argc == 1)
     {
         printHelp();
-        return nullptr;
+        return {};
     }
 
     po::variables_map varMap;
@@ -50,7 +50,7 @@ po::variables_map Options::parseArgumets(int *argc, char ***argv)
     {
         std::cerr << "Error: " << e.what() << std::endl;
         std::cerr << "Use --help for help" << std::endl;
-        return nullptr;
+        return {};
     }
 
     return varMap;
