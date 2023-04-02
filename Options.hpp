@@ -21,6 +21,7 @@ public:
 
 protected:
     const options_t declared;
+    po::variables_map parseArgumets(int *argc, char ***argv);
     void printHelp() const;
 
 private:

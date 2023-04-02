@@ -17,7 +17,7 @@ options_t Options::declareOptions()
                             "Start directory (subfolders aware)")
         ("log_file,l",      po::value<std::string>()->default_value("specific_grep.log"),
                             "Name of the log file")
-        ("result_file, r",  po::value<std::string>()->default_value("specific_grep.txt"),
+        ("result_file,r",  po::value<std::string>()->default_value("specific_grep.txt"),
                             "Name of the file where result is given")
         ("threads, t",      po::value<int>()->default_value(4),
                             "Number of threads in the pool")
@@ -27,6 +27,33 @@ options_t Options::declareOptions()
     specificGrepOpt.positional.add("pattern", 1);
 
     return specificGrepOpt;
+}
+
+po::variables_map Options::parseArgumets(int *argc, char ***argv)
+{
+    if (*argc == 1)
+    {
+        printHelp();
+        return nullptr;
+    }
+
+    po::variables_map varMap;
+    try
+    {
+        po::command_line_parser parser(*argc, *argv);
+        parser.options(declared.standard);
+        parser.positional(declared.positional);
+        po::store(parser.run(), varMap);
+        po::notify(varMap);
+    }
+    catch (po::error &e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "Use --help for help" << std::endl;
+        return nullptr;
+    }
+
+    return varMap;
 }
 
 void Options::printHelp() const
