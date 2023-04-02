@@ -2,38 +2,10 @@
 #include "SpecificGrep.hpp"
 
 SpecificGrep::SpecificGrep()
-:declaredOptions(declareOptions())
+:Options()
 {};
 
 SpecificGrep::~SpecificGrep(){};
-
-options_t SpecificGrep::declareOptions()
-{
-    options_t specificGrepOpt;
-
-    specificGrepOpt.standard.add_options()
-        ("help",            "These menu")
-        ("dir,d",           po::value<std::string>()->default_value("."),
-                            "Start directory (subfolders aware)")
-        ("log_file,l",      po::value<std::string>()->default_value("specific_grep.log"),
-                            "Name of the log file")
-        ("result_file, r",  po::value<std::string>()->default_value("specific_grep.txt"),
-                            "Name of the file where result is given")
-        ("threads, t",      po::value<int>()->default_value(4),
-                            "Number of threads in the pool")
-        ("pattern",         po::value<std::string>(), "Search pattern")
-    ;
-
-    specificGrepOpt.positional.add("pattern", 1);
-
-    return specificGrepOpt;
-}
-
-void SpecificGrep::printHelp() const
-{
-    std::cout << "Usage: \n" << "\t ./specific_grep PATTERN OPTIONS \n" << std::endl;
-    std::cout << declaredOptions.standard << std::endl;
-}
 
 void SpecificGrep::parseArguments(int argc, char *argv[])
 {
@@ -45,8 +17,8 @@ void SpecificGrep::parseArguments(int argc, char *argv[])
     po::variables_map vm;
     try {
         po::command_line_parser parser(argc, argv);
-        parser.options(declaredOptions.standard);
-        parser.positional(declaredOptions.positional);
+        parser.options(declared.standard);
+        parser.positional(declared.positional);
         po::store(parser.run(), vm);
         po::notify(vm);
     } catch (po::error& e) {
