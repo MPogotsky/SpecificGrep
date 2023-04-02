@@ -36,6 +36,15 @@ void SpecificGrep::entryPoint(int argc, char *argv[])
         exit(EXIT_SUCCESS);
     }
 
+    if (vm.count("pattern"))
+    {
+        std::cout << "Search for: " << vm["pattern"].as<std::string>() << std::endl;
+    } else {
+        std::cerr << "Error: No search pattern is specified" << std::endl;
+        std::cerr << "Use --help for help" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
     if (vm.count("dir"))
     {
         std::cout << "Directory: " << vm["dir"].as<std::string>() << std::endl;
@@ -54,11 +63,6 @@ void SpecificGrep::entryPoint(int argc, char *argv[])
     if (vm.count("threads"))
     {
         std::cout << "Number of threads: " << vm["threads"].as<int>() << std::endl;
-    }
-
-    if (vm.count("pattern"))
-    {
-        std::cout << "Search for: " << vm["pattern"].as<std::string>() << std::endl;
     }
 
     exit(EXIT_SUCCESS);
