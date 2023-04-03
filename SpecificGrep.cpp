@@ -49,12 +49,11 @@ void SpecificGrep::entryPoint(int argc, char *argv[])
         std::cout << "Number of threads: " << optionMap["threads"].as<int>() << std::endl;
     }
 
-    Scout scout = Scout(optionMap["dir"].as<std::string>());
+    Scout scout(optionMap["dir"].as<std::string>(),
+                optionMap["threads"].as<int>());
     filesToProceed = scout.getFindings();
 
-    for(auto &el : filesToProceed){
-        std::cout << el << std::endl;
-    }
+    std::cout << "Number of entries: " << filesToProceed.size() << "\n";
 
     exit(EXIT_SUCCESS);
 }

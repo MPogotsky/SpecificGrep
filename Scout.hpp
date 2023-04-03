@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
@@ -20,16 +21,14 @@ using lock_guard = boost::lock_guard<bmux>;
 class Scout
 {
 public:
-    explicit Scout(const std::string& directory);
+    Scout(const std::string& directory, int numberOfThreads);
     ~Scout();
 
     std::vector<std::string> getFindings() const;
 
 private:
-    void entryPoint();
     void searchTheArea(const fs::path &dir, asio::thread_pool &pool);
 
-    fs::path entryDir;
     static std::vector<std::string> findings;
 
     static bmux coutMutex;

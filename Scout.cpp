@@ -5,21 +5,15 @@ bmux Scout::filesMutex;
 bmux Scout::poolMutex;
 std::vector<std::string> Scout::findings;
 
-Scout::Scout(const std::string &directory)
-    : entryDir(directory)
+Scout::Scout(const std::string &directory, int numberOfThreads)
 {
-    entryPoint();
-}
-
-Scout::~Scout(){};
-
-void Scout::entryPoint()
-{
-    asio::thread_pool pool(boost::thread::hardware_concurrency());
-    asio::post(pool, boost::bind(&Scout::searchTheArea, this, entryDir, boost::ref(pool)));
+    asio::thread_pool pool(numberOfThreads);
+    asio::post(pool, boost::bind(&Scout::searchTheArea, this, fs::path(directory), boost::ref(pool)));
 
     pool.wait();
 }
+
+Scout::~Scout(){};
 
 std::vector<std::string> Scout::getFindings() const
 {
@@ -28,17 +22,33 @@ std::vector<std::string> Scout::getFindings() const
 
 void Scout::searchTheArea(const fs::path &dir, asio::thread_pool &pool)
 {
-    for (fs::directory_entry &entry : fs::directory_iterator(dir, fs::directory_options::skip_permission_denied))
+    // Avoid empty files and directories not to waste time and recources
+    for (fs::directory_entry &entry : fs::directory_iterator(dir))
     {
-        if (is_directory(entry.path()) && !is_empty(entry.path()))
+        try
         {
-            lock_guard pool_lock(poolMutex);
-            post(pool, boost::bind(&Scout::searchTheArea, this, entry.path(), boost::ref(pool)));
+            if (!fs::is_empty(entry.path()))
+            {
+                if (fs::is_directory(entry.path()))
+                {
+                    lock_guard poolLock(poolMutex);
+                    post(pool, boost::bind(&Scout::searchTheArea, this, entry.path(), boost::ref(pool)));
+                }
+                else if (fs::is_regular_file(entry.path()))
+                {
+                    lock_guard poolLock(filesMutex);
+                    findings.push_back(entry.path().string());
+                }
+            }
         }
-        else if (is_regular_file(entry.path()) && !is_empty(entry.path()))
+        catch (const fs::filesystem_error &ex)
         {
-            lock_guard lock(filesMutex);
-            findings.push_back(entry.path().string());
+            if (ex.code() == boost::system::errc::permission_denied)
+            {
+                lock_guard poolLock(coutMutex);
+                std::cout << "Permission denied: " << ex.path1() << std::endl;
+            }
+            continue;
         }
     }
 }
