@@ -8,7 +8,7 @@ file( GLOB SOURCE_FILES
 )
 
 # Find boost lib dependency
-find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(Boost REQUIRED COMPONENTS program_options thread filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 
 
