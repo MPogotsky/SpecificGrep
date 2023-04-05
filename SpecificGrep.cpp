@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "SpecificGrep.hpp"
 
 SpecificGrep::SpecificGrep()
