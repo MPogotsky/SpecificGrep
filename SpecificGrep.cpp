@@ -1,9 +1,7 @@
-#include <iostream>
-#include <memory>
 #include "SpecificGrep.hpp"
 
 SpecificGrep::SpecificGrep()
-    : Options(){};
+{};
 
 SpecificGrep::~SpecificGrep(){};
 

@@ -1,8 +1,8 @@
 #pragma once
 
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
 
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>

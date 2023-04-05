@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <memory>
+
 #include "Options.hpp"
 #include "Scout.hpp"
 

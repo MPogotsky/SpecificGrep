@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Options.hpp"
 
 Options::Options()
