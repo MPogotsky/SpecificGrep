@@ -1,7 +1,6 @@
 #include "SpecificGrep.hpp"
 
-SpecificGrep::SpecificGrep()
-{};
+SpecificGrep::SpecificGrep(){};
 
 SpecificGrep::~SpecificGrep(){};
 
@@ -31,9 +30,6 @@ void SpecificGrep::entryPoint(int argc, char *argv[])
     Scout scout(optionMap["dir"].as<std::string>(),
                 optionMap["pattern"].as<std::string>(),
                 optionMap["threads"].as<int>());
-
-    // thread_map * aa = scout.getThreadLog();
-    // findings_map * bb = scout.getResults();
 
     writeLogsToFile(optionMap["log_file"].as<std::string>(), scout.getThreadLog());
     writeResultsToFile(optionMap["result_file"].as<std::string>(), scout.getResults());
