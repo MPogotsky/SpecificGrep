@@ -2,7 +2,8 @@
 
 bmux Scout::coutMutex;
 bmux ThreadBase::poolMutex;
-bmux Scout::findingsMutex;
+bmux Scout::threadLogMutex;
+bmux Scout::resultsMutex;
 
 ThreadBase::ThreadBase(int numberOfThreads)
     : pool(numberOfThreads){};
@@ -13,8 +14,10 @@ void ThreadBase::addNewTaskToPull(std::function<void()> func)
     post(pool, func);
 }
 
-Scout::Scout(const std::string &directory, int numberOfThreads)
-    : ThreadBase(numberOfThreads), results(new findings_map())
+Scout::Scout(const std::string &directory, const std::string& pattern, int numberOfThreads)
+    : ThreadBase(numberOfThreads), pattern(pattern),
+      searchedFiles({0}), patternHits({0}),
+      results(new findings_map()), threadLog(new thread_map())
 {
     addNewTaskToPull(boost::bind(&Scout::searchTheArea, this, fs::path(directory), boost::ref(pool)));
     pool.wait();
@@ -23,37 +26,32 @@ Scout::Scout(const std::string &directory, int numberOfThreads)
 Scout::~Scout()
 {
     delete[] results;
+    delete[] threadLog;
 }
 
-void Scout::getResults() const
+findings_map* Scout::getResults() const
 {
-    for (auto it = results->begin(); it != results->end(); ++it)
-    {
-        std::cout << it->first << ": ";
+    return results;
+}
 
-        for (size_t i = 0; i < it->second.size(); ++i)
-        {
-            std::cout << it->second.at(i).lineNumber << ":";
-            std::cout << it->second.at(i).lineFound << "\n";
-        }
-
-        std::cout << std::endl;
-    }
+thread_map* Scout::getThreadLog() const
+{
+    return threadLog;
 }
 
 int Scout::getSearchedFiles() const
 {
-    return searchedFiles;
+    return searchedFiles.load();
 }
 
 int Scout::getFilesWithPattern() const
 {
-    return filesWithPattern;
+    return static_cast<int>(results->size());
 }
 
 int Scout::getPatternHits() const
 {
-    return patternHits;
+    return patternHits.load();
 }
 
 void Scout::searchTheArea(const fs::path &dir, asio::thread_pool &pool)
@@ -87,13 +85,41 @@ void Scout::searchTheArea(const fs::path &dir, asio::thread_pool &pool)
     }
 }
 
+void Scout::addToResults(const std::string& file, const finding_t& finding)
+{
+    lock_guard findingsLock(resultsMutex);
+    auto iter = results->find(file);
+    if (iter != results->end())
+    {
+        iter->second.push_back(finding);
+    }
+    else
+    {
+        results->insert(std::make_pair(file, std::vector<finding_t>{}));
+        results->at(file).push_back(finding);
+    }
+    patternHits++;
+}
+
+void Scout::addToThreadLog(const std::string& file)
+{
+    lock_guard logLock(threadLogMutex);
+    auto thrId = boost::this_thread::get_id();
+    auto tmp = std::make_pair(thrId, file);
+
+    auto iter = threadLog->insert(std::make_pair(thrId, file));
+    if(!iter.second){
+        threadLog->at(thrId)+= (", " + file);
+    }
+    searchedFiles++;
+}
+
 void Scout::searchForPattern(const fs::path &filePath)
 {
     fs::ifstream file(filePath);
     std::string line;
-    std::string pattern = "dir_1";
 
-    searchedFiles++;
+    addToThreadLog(filePath.filename().string());
 
     int lineCounter = 1;
 
@@ -101,32 +127,15 @@ void Scout::searchForPattern(const fs::path &filePath)
     {
         auto searcher = std::boyer_moore_searcher(pattern.begin(), pattern.end());
         auto result = std::search(line.begin(), line.end(), searcher);
-
         if (result != line.end())
         {
-            lock_guard findingsLock(findingsMutex);
-
-            std::string file = filePath.string();
+            // std::string file = filePath.string();
             finding_t finding;
             finding.lineNumber = lineCounter;
             finding.lineFound = line;
-
-            auto iter = results->find(file);
-            if (iter != results->end())
-            {
-                iter->second.push_back(finding);
-            }
-            else
-            {
-                std::vector<finding_t> findingsNew;
-                findingsNew.push_back(finding);
-                results->insert(std::make_pair(filePath.string(), findingsNew));
-            }
-
-            patternHits++;
+            addToResults(filePath.string(), finding); 
         }
         lineCounter++;
     }
-
     file.close();
 }

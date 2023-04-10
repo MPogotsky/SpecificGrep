@@ -28,35 +28,23 @@ void SpecificGrep::entryPoint(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    if (optionMap.count("dir"))
-    {
-        std::cout << "Directory: " << optionMap["dir"].as<std::string>() << std::endl;
-    }
-
-    if (optionMap.count("log_file"))
-    {
-        std::cout << "Loggin to: " << optionMap["log_file"].as<std::string>() << std::endl;
-    }
-
-    if (optionMap.count("result_file"))
-    {
-        std::cout << "Results to: " << optionMap["result_file"].as<std::string>() << std::endl;
-    }
-
-    if (optionMap.count("threads"))
-    {
-        std::cout << "Number of threads: " << optionMap["threads"].as<int>() << std::endl;
-    }
-
     Scout scout(optionMap["dir"].as<std::string>(),
+                optionMap["pattern"].as<std::string>(),
                 optionMap["threads"].as<int>());
-    // filesToProceed = scout.getResults();
 
-     std::cout << "Number of searched files: "; scout.getResults();
+    // thread_map * aa = scout.getThreadLog();
+    // findings_map * bb = scout.getResults();
 
-    std::cout << "Number of searched files: " << scout.getSearchedFiles() << "\n";
-    std::cout << "Number of files with patterns: " << scout.getFilesWithPattern() << "\n";
-    std::cout << "Number of pattern hits: " << scout.getPatternHits() << "\n";
+    writeLogsToFile(optionMap["log_file"].as<std::string>(), scout.getThreadLog());
+    writeResultsToFile(optionMap["result_file"].as<std::string>(), scout.getResults());
+
+    std::cout << "Searched files: " << scout.getSearchedFiles() << std::endl;
+    std::cout << "Files with patterns: " << scout.getFilesWithPattern() << std::endl;
+    std::cout << "Pattern hits: " << scout.getPatternHits() << std::endl;
+
+    std::cout << "Result file: " << optionMap["result_file"].as<std::string>() << std::endl;
+    std::cout << "Log file: " << optionMap["log_file"].as<std::string>() << std::endl;
+    std::cout << "Used threads: " << optionMap["threads"].as<int>() << std::endl;
 
 
     exit(EXIT_SUCCESS);

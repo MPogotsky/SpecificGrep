@@ -4,9 +4,10 @@
 #include <memory>
 
 #include "Options.hpp"
+#include "FileManager.hpp"
 #include "Scout.hpp"
 
-class SpecificGrep : public Options
+class SpecificGrep : public Options, public FileManager
 {
 public:
     SpecificGrep(SpecificGrep &other) = delete;
@@ -25,7 +26,6 @@ public:
     void operator=(const SpecificGrep &) = delete;
 private:
     SpecificGrep();
-    std::vector<std::string> filesToProceed;
 };
 
 inline std::unique_ptr<SpecificGrep> specificGrep(SpecificGrep::getInstance());

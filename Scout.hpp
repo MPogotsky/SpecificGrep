@@ -4,7 +4,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <functional>
 #include <fstream>
 
 #include <boost/thread/thread.hpp>
@@ -14,6 +13,8 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
+
+#include "Collectibles.hpp"
 
 namespace fs = boost::filesystem;
 namespace asio = boost::asio;
@@ -32,37 +33,35 @@ public:
     void addNewTaskToPull(std::function<void()> func);
 };
 
-struct InFilefinding
-{
-    int lineNumber;
-    std::string lineFound;
-};
-
-typedef struct InFilefinding finding_t;
-
-using findings_map = std::map<std::string, std::vector<finding_t>>;
-
 class Scout : protected ThreadBase
 {
 public:
-    Scout(const std::string& directory, int numberOfThreads);
+    Scout() = delete;
+    Scout(const std::string& directory, const std::string& pattern, int numberOfThreads = 4);
     ~Scout();
 
-    void getResults() const;
     int getSearchedFiles() const;
     int getFilesWithPattern() const;
     int getPatternHits() const;
+
+    thread_map* getThreadLog() const;
+    findings_map* getResults() const;
 
 private:
     void searchTheArea(const fs::path &dir, asio::thread_pool &pool);
     void searchForPattern(const fs::path &file);
 
-    // std::unique_ptr<std::vector<finding_t>> results;
+    void addToResults(const std::string& file, const finding_t& finding);
+    void addToThreadLog(const std::string& file);
+
+    std::string pattern;
     findings_map* results;
+    thread_map* threadLog;
+
     std::atomic<int> searchedFiles;
-    std::atomic<int> filesWithPattern;
     std::atomic<int> patternHits;
 
     static bmux coutMutex;
-    static bmux findingsMutex;
+    static bmux threadLogMutex;
+    static bmux resultsMutex;
 };
