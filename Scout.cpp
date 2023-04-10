@@ -1,21 +1,44 @@
 #include "Scout.hpp"
 
 bmux Scout::coutMutex;
-bmux Scout::poolMutex;
+bmux ThreadBase::poolMutex;
 bmux Scout::findingsMutex;
 
+ThreadBase::ThreadBase(int numberOfThreads)
+    : pool(numberOfThreads){};
+
+void ThreadBase::addNewTaskToPull(std::function<void()> func)
+{
+    lock_guard poolLock(poolMutex);
+    post(pool, func);
+}
+
 Scout::Scout(const std::string &directory, int numberOfThreads)
-: pool(numberOfThreads)
+    : ThreadBase(numberOfThreads), results(new findings_map())
 {
     addNewTaskToPull(boost::bind(&Scout::searchTheArea, this, fs::path(directory), boost::ref(pool)));
     pool.wait();
 }
 
-Scout::~Scout(){};
-
-std::vector<std::string> Scout::getFindings() const
+Scout::~Scout()
 {
-    return findings;
+    delete[] results;
+}
+
+void Scout::getResults() const
+{
+    for (auto it = results->begin(); it != results->end(); ++it)
+    {
+        std::cout << it->first << ": ";
+
+        for (size_t i = 0; i < it->second.size(); ++i)
+        {
+            std::cout << it->second.at(i).lineNumber << ":";
+            std::cout << it->second.at(i).lineFound << "\n";
+        }
+
+        std::cout << std::endl;
+    }
 }
 
 int Scout::getSearchedFiles() const
@@ -31,12 +54,6 @@ int Scout::getFilesWithPattern() const
 int Scout::getPatternHits() const
 {
     return patternHits;
-}
-
-void Scout::addNewTaskToPull(std::function<void()> func)
-{
-    lock_guard poolLock(poolMutex);
-    post(pool, func);
 }
 
 void Scout::searchTheArea(const fs::path &dir, asio::thread_pool &pool)
@@ -78,16 +95,37 @@ void Scout::searchForPattern(const fs::path &filePath)
 
     searchedFiles++;
 
+    int lineCounter = 1;
+
     while (std::getline(file, line))
     {
         auto searcher = std::boyer_moore_searcher(pattern.begin(), pattern.end());
         auto result = std::search(line.begin(), line.end(), searcher);
+
         if (result != line.end())
         {
             lock_guard findingsLock(findingsMutex);
-            findings.push_back(line);
+
+            std::string file = filePath.string();
+            finding_t finding;
+            finding.lineNumber = lineCounter;
+            finding.lineFound = line;
+
+            auto iter = results->find(file);
+            if (iter != results->end())
+            {
+                iter->second.push_back(finding);
+            }
+            else
+            {
+                std::vector<finding_t> findingsNew;
+                findingsNew.push_back(finding);
+                results->insert(std::make_pair(filePath.string(), findingsNew));
+            }
+
             patternHits++;
         }
+        lineCounter++;
     }
 
     file.close();

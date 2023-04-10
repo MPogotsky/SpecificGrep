@@ -50,7 +50,9 @@ void SpecificGrep::entryPoint(int argc, char *argv[])
 
     Scout scout(optionMap["dir"].as<std::string>(),
                 optionMap["threads"].as<int>());
-    filesToProceed = scout.getFindings();
+    // filesToProceed = scout.getResults();
+
+     std::cout << "Number of searched files: "; scout.getResults();
 
     std::cout << "Number of searched files: " << scout.getSearchedFiles() << "\n";
     std::cout << "Number of files with patterns: " << scout.getFilesWithPattern() << "\n";

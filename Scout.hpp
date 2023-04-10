@@ -22,13 +22,33 @@ using bmux = boost::mutex;
 using lock_guard = boost::lock_guard<bmux>;
 
 
-class Scout
+class ThreadBase
+{
+public:
+    ThreadBase(int numberOfThreads);
+    asio::thread_pool pool;
+    static bmux poolMutex;
+
+    void addNewTaskToPull(std::function<void()> func);
+};
+
+struct InFilefinding
+{
+    int lineNumber;
+    std::string lineFound;
+};
+
+typedef struct InFilefinding finding_t;
+
+using findings_map = std::map<std::string, std::vector<finding_t>>;
+
+class Scout : protected ThreadBase
 {
 public:
     Scout(const std::string& directory, int numberOfThreads);
     ~Scout();
 
-    std::vector<std::string> getFindings() const;
+    void getResults() const;
     int getSearchedFiles() const;
     int getFilesWithPattern() const;
     int getPatternHits() const;
@@ -37,14 +57,12 @@ private:
     void searchTheArea(const fs::path &dir, asio::thread_pool &pool);
     void searchForPattern(const fs::path &file);
 
-    std::vector<std::string> findings;
+    // std::unique_ptr<std::vector<finding_t>> results;
+    findings_map* results;
     std::atomic<int> searchedFiles;
     std::atomic<int> filesWithPattern;
     std::atomic<int> patternHits;
 
-    asio::thread_pool pool;
     static bmux coutMutex;
     static bmux findingsMutex;
-    static bmux poolMutex;
-    void addNewTaskToPull(std::function<void()> func);
 };
