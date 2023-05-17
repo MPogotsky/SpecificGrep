@@ -23,11 +23,16 @@ mkdir build
 cd build
 ```
 
-3. Build the executable:
+3. Build an executable:
 
 ```console
 cmake ..
 make
+```
+
+To build unit tests as well, run cmake with following flag:
+```console
+cmake -DUNIT_TESTS=ON ..
 ```
 
 ## Usage
