@@ -16,6 +16,7 @@ typedef options options_t;
 
 class Options
 {
+    friend class OptionsTest;
 public:
     Options();
     virtual ~Options();
