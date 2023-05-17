@@ -34,3 +34,6 @@
 # Build dir
 build/
 bin/
+
+# vscode dir
+.vscode/
