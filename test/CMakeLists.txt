@@ -2,16 +2,17 @@
 find_package( GTest REQUIRED )
 include_directories( ${GTEST_INCLUDE_DIRS} )
 
-# Find boost lib dependency
-find_package( Boost REQUIRED COMPONENTS
-              program_options
-              thread
-              filesystem
+set( LIBS
+    ${GTEST_LIBRARIES}
+    specific_grep_lib
 )
-include_directories( ${Boost_INCLUDE_DIRS} )
 
-set( TESTS UT_Options.cpp )
-set( SOURCES ${CMAKE_SOURCE_DIR}/src/Options.cpp )
+set( TESTS
+     UT_Options.cpp
+)
 
-add_executable( UT_SpecificGrep ${TESTS} ${SOURCES} )
-target_link_libraries( UT_SpecificGrep PRIVATE ${GTEST_LIBRARIES} ${Boost_LIBRARIES} )
+add_executable( UT_SpecificGrep ${TESTS} )
+target_link_libraries( UT_SpecificGrep
+                       PRIVATE
+                           ${LIBS} )
+add_test(UT_SpecificGrep UT_SpecificGrep)
