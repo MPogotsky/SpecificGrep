@@ -24,6 +24,7 @@ public:
     void entryPoint(int argc, char *argv[]);
 
     void operator=(const SpecificGrep &) = delete;
+    void operator=(const SpecificGrep &&) = delete;
 private:
     SpecificGrep();
 };
