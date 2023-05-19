@@ -17,13 +17,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    # - name: Install Boost
+    #   id: boost
+    #   uses: egor-tensin/build-boost@v1
+    #   with:
+    #     version: 1.74.0
+    #     libraries: filesystem program_options thread
+    #     configuration: Release
+
     - name: Install Boost
-      id: boost
-      uses: egor-tensin/build-boost@v1
-      with:
-        version: 1.74.0
-        libraries: filesystem program_options thread
-        configuration: Release
+      run: |
+        sudo apt install libboost-thread-dev libboost-program-options-dev libboost-filesystem-dev
 
     - name: Install Gtest
       run: |
