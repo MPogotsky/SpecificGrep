@@ -30,7 +30,7 @@ options_t Options::declareOptions()
 
 po::variables_map Options::parseArgumets(int *argc, char ***argv)
 {
-    if (*argc == 1)
+    if (*argc < 2 )
     {
         printHelp();
         return {};
