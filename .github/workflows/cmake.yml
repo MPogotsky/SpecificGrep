@@ -27,6 +27,7 @@ jobs:
         version: 1.74.0
         libraries: filesystem program_options thread
         configuration: Release
+        directory: /usr/include
     
     - name: Show paths
       run: |
