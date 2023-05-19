@@ -39,7 +39,9 @@ jobs:
 
     - name: Build
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --DUNIT_TEST=ON
+      run: |
+        cd ${{github.workspace}}/build
+        cmake -DUNIT_TESTS=ON ..
 
     - name: Test
       working-directory: ${{github.workspace}}/build/test
