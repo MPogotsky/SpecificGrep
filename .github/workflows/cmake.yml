@@ -7,17 +7,16 @@ on:
     branches: [ "master" ]
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
 
     - name: Install Boost
+      # Install only needed packages, let`s save space and time :)
       run: |
         sudo apt install libboost-thread-dev
         sudo apt install libboost-program-options-dev
@@ -28,7 +27,6 @@ jobs:
         sudo apt-get install libgtest-dev
 
     - name: Build project
-      # Build your program with the given configuration
       working-directory: ${{github.workspace}}
       run: |
         mkdir build
@@ -36,9 +34,16 @@ jobs:
         cmake -DUNIT_TESTS=ON ..
         make
 
-    - name: UT Tests
-      working-directory: ${{github.workspace}}/build/test
-      # Execute tests defined by the CMake configuration.
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: |
-        ./UT_SpecificGrep
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: UT Tests
+        working-directory: ${{github.workspace}}/build/test
+        # Execute tests defined by the CMake configuration.
+        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+        run: |
+          ./UT_SpecificGrep
+  
