@@ -37,8 +37,10 @@ jobs:
 
     - name: Build project
       # Build your program with the given configuration
-      working-directory: ${{github.workspace}}/build
+      working-directory: ${{github.workspace}}
       run: |
+        mkdir build
+        cd build
         cmake -DUNIT_TESTS=ON ..
         make
 
