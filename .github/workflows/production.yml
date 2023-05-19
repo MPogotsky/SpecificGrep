@@ -1,0 +1,41 @@
+name: Production
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  production-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Boost
+      # Install only needed packages, let`s save space and time :)
+      run: |
+        sudo apt install libboost-thread-dev
+        sudo apt install libboost-program-options-dev
+        sudo apt install libboost-filesystem-dev
+
+    - name: Install Gtest
+      run: |
+        sudo apt-get install libgtest-dev
+
+    - name: Build project
+      working-directory: ${{github.workspace}}
+      run: |
+        mkdir build
+        cd build
+        cmake -DUNIT_TESTS=ON ..
+        make
+
+    - name: UT Tests
+      working-directory: ${{github.workspace}}/build/test
+      run: |
+        ./UT_SpecificGrep
+  
