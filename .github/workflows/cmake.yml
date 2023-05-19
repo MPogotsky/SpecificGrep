@@ -17,27 +17,15 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    # - name: Install Boost
-    #   id: boost
-    #   uses: egor-tensin/build-boost@v1
-    #   with:
-    #     version: 1.74.0
-    #     libraries: filesystem program_options thread
-    #     configuration: Release
-
     - name: Install Boost
       run: |
-        sudo apt install libboost-thread-dev libboost-program-options-dev libboost-filesystem-dev
+        sudo apt install libboost-thread-dev
+        sudo apt install libboost-program-options-dev
+        sudo apt install libboost-filesystem-dev
 
     - name: Install Gtest
       run: |
         sudo apt-get install libgtest-dev
-        cd /usr/src/gtest
-        sudo cmake CMakeLists.txt
-        sudo make 
-        sudo cp lib/*.a /usr/lib
-        sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a
-        sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
 
     - name: Build project
       # Build your program with the given configuration
